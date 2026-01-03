@@ -1,6 +1,6 @@
 // Firebase Config
 const firebaseConfig = {
-  apiKey: "AIzaSyDG9JaKzdjbuUVem3O63-JxLFv9ItDwo",
+  apiKey: ""AIzaSyAQc5W6gwVn1JmZ8VKXBy3JmSV6pH+PuBo"
   authDomain: "fallout-sheet.firebaseapp.com",
   projectId: "fallout-sheet",
   storageBucket: "fallout-sheet.firebaseStorage.app",
