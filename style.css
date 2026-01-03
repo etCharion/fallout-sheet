@@ -1,0 +1,142 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #222;
+  color: #fff;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.admin-panel {
+  background: #333;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn, .btn-small, .btn-submit {
+  padding: 10px 15px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-small {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.btn:hover, .btn-small:hover, .btn-submit:hover {
+  background-color: #45a049;
+}
+
+#passwordInput {
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background-color: #444;
+  color: #fff;
+}
+
+.sheet-container {
+  background-color: #333;
+  padding: 30px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+h1, h2 {
+  color: #FFD700;
+  margin-bottom: 15px;
+  margin-top: 20px;
+}
+
+.form-section {
+  margin-bottom: 30px;
+  padding: 15px;
+  border-left: 3px solid #FFD700;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  color: #FFD700;
+  font-weight: bold;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #555;
+  border-radius: 4px;
+  background-color: #444;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus {
+  outline: none;
+  border-color: #FFD700;
+  box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+}
+
+.weapon-row, .perk-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.weapon-row input, .perk-row input {
+  flex: 1;
+}
+
+.weapon-row button, .perk-row button {
+  padding: 10px 15px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 15px;
+  font-size: 16px;
+  background-color: #2196F3;
+  margin-top: 20px;
+}
+
+.btn-submit:hover {
+  background-color: #0b7dda;
+}
+
+#loginStatus {
+  color: #90EE90;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
