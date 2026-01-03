@@ -132,8 +132,7 @@ function addWeapon(n = '', d = '') {
   row.className = 'weapon-row';
   row.innerHTML = `<input type="text" placeholder="Zbran" value="${n}"><input type="text" placeholder="Damage" value="${d}"><button type="button" class="btn-rem">Odebrat</button>`;
   row.querySelector('.btn-rem').addEventListener('click', () => row.remove());
-  cnt.appendChild(row);  row.querySelector('.btn-rem').addEventListener('click', () => row.remove());
-  cnt.appendChild(row);
+  cnt.appendChild(row); 
 }
 
 function addPerk(n = '') {
@@ -142,8 +141,7 @@ function addPerk(n = '') {
   row.className = 'perk-row';
   row.innerHTML = `<input type="text" placeholder="Perk" value="${n}"><button type="button" class="btn-rem">Odebrat</button>`;
   row.querySelector('.btn-rem').addEventListener('click', () => row.remove());
-  cnt.appendChild(row);  row.querySelector('.btn-rem').addEventListener('click', () => row.remove());
-  cnt.appendChild(row);
+  cnt.appendChild(row)
 }
 
 function generateSPECIAL() {
