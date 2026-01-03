@@ -8,106 +8,149 @@ const firebaseConfig = {
   appId: "1:1013179280650:web:72c246cc5357b1d05def3"
 };
 
-// Initialize Firebase
-const app = firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-// Sign in anonymously
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    document.getElementById('loginStatus').textContent = 'Přihlášené';
-  } else {
-    auth.signInAnonymously().catch(console.error);
-  }
-});
-
-// DOM Elements
-const charForm = document.getElementById('charForm');
-const loadCharBtn = document.getElementById('loadCharBtn');
-const newCharBtn = document.getElementById('newCharBtn');
-const editCharBtn = document.getElementById('editCharBtn');
-const deleteCharBtn = document.getElementById('deleteCharBtn');
-const passwordInput = document.getElementById('passwordInput');
-const addWeaponBtn = document.getElementById('addWeaponBtn');
-const addPerkBtn = document.getElementById('addPerkBtn');
-
-let currentCharacter = null;
+let currentCharacterId = null;
 const SPECIAL_ATTRIBUTES = ['Strength', 'Perception', 'Endurance', 'Charisma', 'Intelligence', 'Agility', 'Luck'];
 
-// Load character list
-loadCharBtn.addEventListener('click', async () => {
-  const snapshot = await db.collection('characters').get();
-  const characters = snapshot.docs.map(doc => doc.data().characterName).join('\\n');
-  const selectedChar = prompt('Dostupné postavy:\\n' + characters + '\\n\\nZadej jméno:');
-  if (selectedChar) loadCharacter(selectedChar);
+let app, auth, db;
+
+window.addEventListener('DOMContentLoaded', () => {
+  app = firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+  db = firebase.firestore();
+  
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      document.getElementById('loginStatus').textContent = 'Prihlasene';
+      setupListeners();
+      generateSPECIAL();
+    } else {
+      auth.signInAnonymously();
+    }
+  });
 });
 
-// Load character from Firestore
-async function loadCharacter(name) {
-  const doc = await db.collection('characters').where('characterName', '==', name).get();
-  if (!doc.empty) {
-    currentCharacter = doc.docs[0].data();
-    populateForm(currentCharacter);
-  } else {
-    alert('Postava nenalezena!');
+function setupListeners() {
+  document.getElementById('newCharBtn').addEventListener('click', newChar);
+  document.getElementById('loadCharBtn').addEventListener('click', loadChar);
+  document.getElementById('editCharBtn').addEventListener('click', editChar);
+  document.getElementById('deleteCharBtn').addEventListener('click', delChar);
+  document.getElementById('charForm').addEventListener('submit', saveChar);
+  document.getElementById('addWeaponBtn').addEventListener('click', addWeapon);
+  document.getElementById('addPerkBtn').addEventListener('click', addPerk);
+}
+
+function newChar() {
+  currentCharacterId = null;
+  document.getElementById('charForm').reset();
+  document.getElementById('weaponsContainer').innerHTML = '';
+  document.getElementById('perksContainer').innerHTML = '';
+  alert('Nova postava');
+}
+
+async function loadChar() {
+  const snap = await db.collection('characters').get();
+  if (snap.empty) { alert('Zadne postavy'); return; }
+  const names = snap.docs.map(d => d.data().characterName);
+  const sel = prompt('Postava:\n' + names.join('\n'));
+  if (sel) {
+    const doc = snap.docs.find(d => d.data().characterName === sel);
+    if (doc) {
+      currentCharacterId = doc.id;
+      loadData(doc.data());
+    }
   }
 }
 
-// Save character
-charForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const formData = new FormData(charForm);
-  const charName = formData.get('characterName');
-  const password = passwordInput.value || charName.toLowerCase().split(' ')[0];
-  
-  const char = Object.fromEntries(formData);
-  
-  if (currentCharacter && currentCharacter.id) {
-    // Update
-    await db.collection('characters').doc(currentCharacter.id).update(char);
-  } else {
-    // Create new
-    await db.collection('characters').add(char);
-  }
-  alert('Š`stávka uložena!');
-});
-
-// Populate form from character data
-function populateForm(char) {
+function loadData(char) {
   document.querySelector('input[name="characterName"]').value = char.characterName || '';
   document.querySelector('input[name="origin"]').value = char.origin || '';
+  SPECIAL_ATTRIBUTES.forEach(a => {
+    const inp = document.querySelector(`input[name="${a}"]`);
+    if (inp) inp.value = char[a] || 5;
+  });
+  document.getElementById('weaponsContainer').innerHTML = '';
+  if (char.weapons) char.weapons.forEach(w => addWeapon(w.name, w.damage));
+  document.getElementById('perksContainer').innerHTML = '';
+  if (char.perks) char.perks.forEach(p => addPerk(p));
 }
 
-// Add weapon row
-addWeaponBtn.addEventListener('click', () => {
-  const container = document.getElementById('weaponsContainer');
+function editChar() {
+  if (!currentCharacterId) { alert('Vyberte postavu'); return; }
+  const pwd = document.getElementById('passwordInput').value;
+  const name = document.querySelector('input[name="characterName"]').value;
+  if (pwd !== name.toLowerCase().split(' ')[0]) { alert('Spatne heslo'); return; }
+  saveChar(null, true);
+}
+
+async function delChar() {
+  if (!currentCharacterId) { alert('Vyberte postavu'); return; }
+  const pwd = document.getElementById('passwordInput').value;
+  const name = document.querySelector('input[name="characterName"]').value;
+  if (pwd !== name.toLowerCase().split(' ')[0]) { alert('Spatne heslo'); return; }
+  if (confirm('Vymazat?')) {
+    await db.collection('characters').doc(currentCharacterId).delete();
+    alert('Smazano');
+    newChar();
+  }
+}
+
+async function saveChar(e, edit = false) {
+  if (e) e.preventDefault();
+  const name = document.querySelector('input[name="characterName"]').value.trim();
+  if (!name) { alert('Zadej jmeno'); return; }
+  const char = {
+    characterName: name,
+    origin: document.querySelector('input[name="origin"]').value,
+    timestamp: new Date(),
+    weapons: [],
+    perks: []
+  };
+  SPECIAL_ATTRIBUTES.forEach(a => {
+    char[a] = parseInt(document.querySelector(`input[name="${a}"]`).value) || 5;
+  });
+  document.querySelectorAll('.weapon-row').forEach(r => {
+    const ins = r.querySelectorAll('input');
+    if (ins[0].value.trim()) char.weapons.push({name: ins[0].value, damage: ins[1].value});
+  });
+  document.querySelectorAll('.perk-row').forEach(r => {
+    const inp = r.querySelector('input');
+    if (inp.value.trim()) char.perks.push(inp.value);
+  });
+  if (currentCharacterId && edit) {
+    await db.collection('characters').doc(currentCharacterId).update(char);
+    alert('Aktualizovano');
+  } else {
+    const ref = await db.collection('characters').add(char);
+    currentCharacterId = ref.id;
+    alert('Ulozeno');
+  }
+}
+
+function addWeapon(n = '', d = '') {
+  const cnt = document.getElementById('weaponsContainer');
   const row = document.createElement('div');
   row.className = 'weapon-row';
-  row.innerHTML = `<input placeholder="Zb raň"> <input placeholder="Zranění"> <button type="button">Odebrat</button>`;
-  row.querySelector('button').addEventListener('click', () => row.remove());
-  container.appendChild(row);
-});
-
-// Add perk row
-addPerkBtn.addEventListener('click', () => {
-  const container = document.getElementById('perksContainer');
-  const row = document.createElement('div');
-  row.className = 'perk-row';
-  row.innerHTML = `<input placeholder="Perk/Rys"> <button type="button">Odebrat</button>`;
-  row.querySelector('button').addEventListener('click', () => row.remove());
-  container.appendChild(row);
-});
-
-// Generate SPECIAL form
-function initSPECIAL() {
-  const container = document.getElementById('specialContainer');
-  SPECIAL_ATTRIBUTES.forEach(attr => {
-    const group = document.createElement('div');
-    group.className = 'form-group';
-    group.innerHTML = `<label>${attr}:</label><input type="number" name="${attr}" min="1" max="10" value="5">`;
-    container.appendChild(group);
-  });
+  row.innerHTML = `<input type="text" placeholder="Zbran" value="${n}"><input type="text" placeholder="Damage" value="${d}"><button type="button" class="btn-rem">Odebrat</button>`;
+  row.querySelector('.btn-rem').addEventListener('click', () => row.remove());
+  cnt.appendChild(row);
 }
 
-initSPECIAL();
+function addPerk(n = '') {
+  const cnt = document.getElementById('perksContainer');
+  const row = document.createElement('div');
+  row.className = 'perk-row';
+  row.innerHTML = `<input type="text" placeholder="Perk" value="${n}"><button type="button" class="btn-rem">Odebrat</button>`;
+  row.querySelector('.btn-rem').addEventListener('click', () => row.remove());
+  cnt.appendChild(row);
+}
+
+function generateSPECIAL() {
+  const c = document.getElementById('specialContainer');
+  c.innerHTML = '';
+  SPECIAL_ATTRIBUTES.forEach(a => {
+    const g = document.createElement('div');
+    g.className = 'form-group';
+    g.innerHTML = `<label>${a}:</label><input type="number" name="${a}" min="1" max="10" value="5">`;
+    c.appendChild(g);
+  });
+}
