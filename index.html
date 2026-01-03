@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fallout 2d20 Character Sheet</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Admin Panel -->
+        <div class="admin-panel">
+            <button id="newCharBtn" class="btn">Nová postava</button>
+            <button id="loadCharBtn" class="btn">Vybrat postavu</button>
+            <button id="editCharBtn" class="btn">Upravit</button>
+            <button id="deleteCharBtn" class="btn">Smazat</button>
+            <input type="password" id="passwordInput" placeholder="Heslo pro úpravy">
+        </div>
+
+        <!-- Character Sheet -->
+        <div id="sheetContainer" class="sheet-container">
+            <h1>Fallout 2d20 Character Sheet</h1>
+            <p id="loginStatus">Přihlašuji...</p>
+            <form id="charForm">
+                <!-- Základní info -->
+                <div class="form-section">
+                    <h2>Základní informace</h2>
+                    <div class="form-group">
+                        <label>Jméno:</label>
+                        <input type="text" name="characterName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Origem:</label>
+                        <input type="text" name="origin">
+                    </div>
+                </div>
+
+                <!-- SPECIAL Atributy -->
+                <div class="form-section">
+                    <h2>SPECIAL Atributy</h2>
+                    <div id="specialContainer"></div>
+                </div>
+
+                <!-- Zbraně -->
+                <div class="form-section">
+                    <h2>Zbraně</h2>
+                    <div id="weaponsContainer"></div>
+                    <button type="button" id="addWeaponBtn" class="btn-small">+ Přidat zbraň</button>
+                </div>
+
+                <!-- Perky -->
+                <div class="form-section">
+                    <h2>Perky/Rysy</h2>
+                    <div id="perksContainer"></div>
+                    <button type="button" id="addPerkBtn" class="btn-small">+ Přidat perk</button>
+                </div>
+
+                <button type="submit" class="btn-submit">Uložit postavu</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
